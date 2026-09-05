@@ -1,330 +1,284 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  ArrowUpRight,
-  ArrowRight,
-  Check,
-  Copy,
-  CodeXml,
-  Plug,
-  ShieldCheck,
-  GitBranch,
-  Terminal,
-  Package,
-  Command,
-} from 'lucide-react';
+import { ArrowUpRight, Check, Copy, Plug } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const repository = 'https://github.com/byalex33/plugget';
 const installCommand =
   'cargo install --git https://github.com/byalex33/plugget.git --locked';
+const commands = [
+  ['search luckperms', 'Find a plugin on Modrinth.'],
+  [
+    'install luckperms',
+    'Install a compatible release and its required dependencies.',
+  ],
+  ['outdated', 'See which managed plugins have compatible updates.'],
+  [
+    'update --all',
+    'Update your managed plugins with recoverable transactions.',
+  ],
+];
 
 export default function Home() {
   const [copyState, setCopyState] = useState('');
   async function copyInstall() {
     try {
       await navigator.clipboard.writeText(installCommand);
-      setCopyState('Copied to clipboard');
+      setCopyState('Copied. Paste it into your terminal.');
     } catch {
-      setCopyState('Select the command below to copy it manually.');
+      setCopyState('Select the command to copy it manually.');
     }
   }
+
   return (
     <>
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-      <header className="header wrap">
-        <a className="brand" href="#main" aria-label="Plugget home">
-          <span className="brand-icon">
-            <Plug size={23} strokeWidth={2.5} />
-          </span>
-          plugget<span className="brand-dot">.</span>
-        </a>
-        <nav aria-label="Main navigation">
-          <a href="#how-it-works">How it works</a>
-          <a href={`${repository}/blob/main/docs/guide.md`}>
-            Documentation <ArrowUpRight size={14} />
+      <div className="page">
+        <header className="header">
+          <a className="wordmark" href="#main" aria-label="Plugget home">
+            <Plug strokeWidth={2.4} aria-hidden="true" />
+            plugget
           </a>
-          <a className="nav-github" href={repository}>
-            <CodeXml size={17} /> GitHub <ArrowUpRight size={14} />
-          </a>
-        </nav>
-      </header>
-      <main id="main">
-        <section className="hero wrap" aria-labelledby="hero-title">
-          <a className="release-label" href={`${repository}/releases`}>
-            <span className="status-dot" /> INTRODUCING PLUGGET{' '}
-            <span className="version">v0.1.0</span>
-            <ArrowRight size={14} />
-          </a>
-          <h1 id="hero-title">
-            Less managing.
-            <br />
-            <span>More Minecraft.</span>
-          </h1>
-          <p className="hero-description">
-            The open-source package manager for server plugins.
-            <br className="desktop-break" /> Find, install, and update your
-            plugins. Right from your terminal.
-          </p>
-          <div className="hero-actions">
-            <a className="action primary" href="#install">
-              Get Plugget <ArrowRight size={18} />
+          <nav aria-label="Main navigation">
+            <a href="#commands">Commands</a>
+            <a href={`${repository}/blob/main/docs/guide.md`}>
+              Docs <ArrowUpRight size={15} />
             </a>
-            <a className="action secondary" href={repository}>
-              <CodeXml size={18} /> View on GitHub
+            <a href={repository}>
+              GitHub <ArrowUpRight size={15} />
             </a>
-          </div>
-          <p className="hero-meta">
-            <span>Free &amp; open source</span>
-            <i /> MIT licensed <i /> Built with Rust
-          </p>
-          <div
-            className="terminal-window"
-            aria-label="Example Plugget installation workflow"
-          >
-            <div className="terminal-title">
-              <div className="window-dots" aria-hidden="true">
-                <i />
-                <i />
-                <i />
-              </div>
-              <span>
-                <Terminal size={13} /> ~/minecraft-server
-              </span>
-              <span className="terminal-shell">zsh</span>
-            </div>
-            <div className="terminal-content">
-              <div className="terminal-comment">
-                # Your next plugin is one command away.
-              </div>
-              <div className="terminal-command">
-                <span>❯</span> plugget install luckperms --yes
-              </div>
-              <div className="terminal-output">
-                <span>
-                  <Check size={15} /> Installed LuckPerms v5.5.71-bukkit.
-                </span>
-                <span className="muted">
-                  Restart the server to apply changes.
-                </span>
-              </div>
-              <div className="terminal-command last-command">
-                <span>❯</span> plugget{' '}
-                <span className="cursor" aria-hidden="true" />
-              </div>
-            </div>
-            <div className="terminal-footer">
-              <span>
-                <ShieldCheck size={14} /> SHA512 verified
-              </span>
-              <span>
-                Example workflow <span className="small-dot" />
-              </span>
-            </div>
-          </div>
-          <div className="platforms">
-            <p>AT HOME ON YOUR SERVER</p>
-            <div>
-              <span>
-                <Package /> Paper
-              </span>
-              <span>
-                <Package /> Purpur
-              </span>
-              <span>
-                <Package /> Spigot
-              </span>
-              <span>
-                <Package /> Bukkit
-              </span>
-            </div>
-          </div>
-        </section>
-        <section
-          className="features wrap"
-          id="how-it-works"
-          aria-labelledby="features-title"
-        >
-          <div className="section-heading">
-            <span className="eyebrow">A SMALL TOOL. A BETTER WORKFLOW.</span>
-            <h2 id="features-title">Your plugins, handled.</h2>
-            <p>
-              All the familiar package-manager essentials.
-              <br />
-              Built around the way you run a Minecraft server.
-            </p>
-          </div>
-          <div className="feature-grid">
-            <article>
-              <div className="feature-icon">
-                <Command size={23} />
-              </div>
-              <span className="feature-number">01 / DISCOVER</span>
-              <h3>
-                The right plugin.
-                <br />
-                The right version.
-              </h3>
-              <p>
-                Search Modrinth and find a release that matches your Minecraft
-                version and server platform. Stable by default.
+          </nav>
+        </header>
+
+        <main id="main">
+          <section className="intro" aria-labelledby="intro-heading">
+            <div className="intro-copy">
+              <p className="eyebrow">
+                MINECRAFT SERVER TOOLS <span>/</span> EST. 2026
               </p>
-              <code>
-                <span>$</span> plugget search luckperms
-              </code>
-            </article>
-            <article>
-              <div className="feature-icon">
-                <ShieldCheck size={23} />
-              </div>
-              <span className="feature-number">02 / INSTALL</span>
-              <h3>
-                Checks first.
+              <h1 id="intro-heading">
+                Plugin management,
                 <br />
-                Changes second.
-              </h3>
-              <p>
-                Downloads are verified before installation. Required
-                dependencies are planned together, and your unmanaged JARs stay
-                untouched.
+                from the
+                <br />
+                <span>command line.</span>
+              </h1>
+              <p className="intro-description">
+                Search Modrinth. Install compatible releases.
+                <br className="wide-only" /> Keep track of what’s on your
+                server.
               </p>
-              <code>
-                <span>$</span> plugget install luckperms
-              </code>
-            </article>
-            <article>
-              <div className="feature-icon">
-                <GitBranch size={23} />
-              </div>
-              <span className="feature-number">03 / MAINTAIN</span>
-              <h3>
-                Keep up.
-                <br />
-                With a way back.
-              </h3>
-              <p>
-                Check compatible updates and apply them with recoverable
-                transactions. Old JARs are retained until the change commits.
-              </p>
-              <code>
-                <span>$</span> plugget update --all
-              </code>
-            </article>
-          </div>
-        </section>
-        <section
-          className="install-section"
-          id="install"
-          aria-labelledby="install-title"
-        >
-          <div className="wrap install-layout">
-            <div>
-              <span className="eyebrow">MEET YOUR NEW SERVER ESSENTIAL</span>
-              <h2 id="install-title">
-                One install.
-                <br />
-                Less busywork.
-              </h2>
-              <p>
-                Build Plugget from source with Rust 1.88 or newer.
-                <br />
-                Then head into your server directory and get going.
-              </p>
-              <a
-                className="text-link"
-                href={`${repository}/blob/main/README.md#installation`}
-              >
-                Read the installation guide <ArrowUpRight size={17} />
+              <a className="inline-link" href="#commands">
+                See the commands <span aria-hidden="true">↓</span>
               </a>
             </div>
-            <div className="install-panel">
-              <div className="install-panel-top">
-                <span>
-                  <Terminal size={16} /> Install from source
-                </span>
-                <span className="source-badge">RUST / CARGO</span>
+
+            <aside
+              className="install"
+              id="install"
+              aria-labelledby="install-heading"
+            >
+              <div className="install-heading">
+                <h2 id="install-heading">Install Plugget</h2>
+                <span>v0.1.0</span>
               </div>
-              <div className="copy-command">
-                <code>{installCommand}</code>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={copyInstall}
-                  aria-label="Copy installation command"
-                >
-                  {copyState === 'Copied to clipboard' ? <Check /> : <Copy />}
-                </Button>
-              </div>
-              <output className="copy-feedback" aria-live="polite">
-                {copyState || 'Windows, macOS, and Linux source builds.'}
-              </output>
-              <div className="next-steps">
-                <span className="terminal-comment">
-                  # Next, inside your server directory
-                </span>
-                <code>
-                  plugget init
-                  <br />
-                  plugget install luckperms
-                </code>
-              </div>
-              <p className="install-note">
-                Early release. Prebuilt binaries are not published yet.
+              <p>
+                A native binary, built with Rust.
                 <br />
-                Stop your server before changes; restart it afterward.
+                No server-side plugin required.
+              </p>
+              <div className="command-label">
+                <span>BUILD FROM SOURCE</span>
+                <span>CARGO</span>
+              </div>
+              <div className="install-command">
+                <code>{installCommand}</code>
+              </div>
+              <Button className="copy-button" onClick={copyInstall}>
+                {copyState.startsWith('Copied') ? (
+                  <Check size={16} />
+                ) : (
+                  <Copy size={16} />
+                )}{' '}
+                {copyState.startsWith('Copied')
+                  ? 'Copied'
+                  : 'Copy install command'}
+              </Button>
+              <output className="copy-feedback" aria-live="polite">
+                {copyState || 'Requires Rust 1.88+ and Cargo on your PATH.'}
+              </output>
+              <div className="availability">
+                <span className="availability-mark" aria-hidden="true">
+                  ↳
+                </span>
+                <p>
+                  Early release. Source builds are available now. Prebuilt
+                  binaries are coming later.
+                </p>
+              </div>
+              <a
+                className="inline-link"
+                href={`${repository}/blob/main/README.md#installation`}
+              >
+                Installation notes <ArrowUpRight size={16} />
+              </a>
+            </aside>
+          </section>
+
+          <div className="compatibility">
+            <span className="label">WORKS WITH</span>
+            <p>
+              Paper <span>/</span> Purpur <span>/</span> Spigot <span>/</span>{' '}
+              Bukkit
+            </p>
+            <span className="compatibility-detail">
+              Windows · macOS · Linux source builds
+            </span>
+          </div>
+
+          <section
+            className="commands"
+            id="commands"
+            aria-labelledby="commands-heading"
+          >
+            <div className="commands-heading">
+              <div>
+                <span className="section-index">01 — USAGE</span>
+                <h2 id="commands-heading">You already know the workflow.</h2>
+              </div>
+              <p>
+                Run these inside your server directory.
+                <br />
+                Start with <code>plugget init</code> to detect your setup.
               </p>
             </div>
-          </div>
-        </section>
-        <section className="open-source wrap">
-          <div className="oss-mark">
-            <CodeXml size={28} />
-          </div>
-          <div>
-            <span className="eyebrow">OPEN SOURCE. OPEN DOORS.</span>
-            <h2>
-              Built for your server.
-              <br />
-              Better with your input.
-            </h2>
+            <dl className="command-list">
+              {commands.map(([command, description]) => (
+                <div className="command-row" key={command}>
+                  <dt>
+                    <span className="prompt" aria-hidden="true">
+                      $
+                    </span>
+                    <code>
+                      <span>plugget</span> {command}
+                    </code>
+                  </dt>
+                  <dd>{description}</dd>
+                </div>
+              ))}
+            </dl>
+            <div className="commands-bottom">
+              <span>
+                Also: <code>info</code>, <code>list</code>, <code>remove</code>,{' '}
+                <code>doctor</code>
+              </span>
+              <a href={`${repository}/blob/main/docs/guide.md`}>
+                Full command reference <ArrowUpRight size={16} />
+              </a>
+            </div>
+          </section>
+
+          <section className="details" aria-labelledby="details-heading">
+            <div className="details-title">
+              <span className="section-index">02 — THE DETAILS</span>
+              <h2 id="details-heading">
+                It’s still
+                <br />
+                your server.
+              </h2>
+              <p>
+                Plugget manages the JARs it installs.
+                <br />
+                You stay in charge of the rest.
+              </p>
+            </div>
+            <dl className="detail-list">
+              <div>
+                <dt>Compatibility before installation</dt>
+                <dd>
+                  Minecraft versions match upstream metadata exactly. Paper can
+                  accept Bukkit and Spigot plugins; the reverse is not assumed.
+                  Stable releases are the default.
+                </dd>
+              </div>
+              <div>
+                <dt>Downloads are checked</dt>
+                <dd>
+                  File size, SHA512, and JAR structure are verified before
+                  installation. Required dependencies are planned together and
+                  confirmed before changes.
+                </dd>
+              </div>
+              <div>
+                <dt>Owned files only</dt>
+                <dd>
+                  Existing, unmanaged JARs remain untouched. Removal sends a
+                  managed JAR to the OS Trash and retains its configuration and
+                  data.
+                </dd>
+              </div>
+              <div>
+                <dt>A record of every change</dt>
+                <dd>
+                  Updates retain the previous JAR until commit. An exclusive
+                  process lock and a recovery journal protect against
+                  overlapping or interrupted operations.
+                </dd>
+              </div>
+            </dl>
+          </section>
+
+          <div className="operator-note">
+            <strong>Before you run it</strong>
             <p>
-              Found a bug? Have a better idea? Help shape a small, focused tool
-              <br className="desktop-break" /> for the Minecraft server
-              community. Every contribution counts.
+              Stop your server before changing plugins, then restart it. Use a
+              local filesystem with hard-link support and a working Recycle Bin
+              or Trash. Keep normal backups; upstream compatibility metadata is
+              not a guarantee.
             </p>
-            <a className="action secondary" href={repository}>
-              Explore the source <ArrowUpRight size={17} />
+          </div>
+
+          <section className="contribute" aria-labelledby="contribute-heading">
+            <div>
+              <span className="section-index">03 — OPEN SOURCE</span>
+              <h2 id="contribute-heading">
+                Read the code.
+                <br />
+                Make it better.
+              </h2>
+            </div>
+            <div className="contribute-copy">
+              <p>
+                Plugget is MIT licensed. Bug reports, documentation fixes, and
+                compatibility test cases are welcome.
+              </p>
+              <a className="source-link" href={repository}>
+                byalex33 / plugget <ArrowUpRight size={20} />
+              </a>
+              <a className="issue-link" href={`${repository}/issues`}>
+                Report an issue <ArrowUpRight size={15} />
+              </a>
+            </div>
+          </section>
+        </main>
+
+        <footer>
+          <div className="footer-first">
+            <a className="wordmark" href="#main">
+              plugget
             </a>
+            <span>The package manager for Minecraft server plugins.</span>
+            <a href={`${repository}/blob/main/LICENSE`}>MIT License ↗</a>
           </div>
-        </section>
-      </main>
-      <footer className="footer wrap">
-        <div className="footer-top">
-          <a className="brand" href="#main">
-            <span className="brand-icon">
-              <Plug size={19} />
-            </span>
-            plugget<span className="brand-dot">.</span>
-          </a>
-          <span className="footer-tagline">
-            Your server. Your plugins. Your terminal.
-          </span>
-          <div>
-            <a href={`${repository}/blob/main/docs/guide.md`}>Docs</a>
-            <a href={`${repository}/issues`}>Issues</a>
-            <a href={`${repository}/blob/main/LICENSE`}>MIT License</a>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <span>Made for the Minecraft community.</span>
-          <span>
-            Not affiliated with Mojang, Microsoft, PaperMC, or Modrinth.
-          </span>
-        </div>
-      </footer>
+          <p>
+            Independent project. Not affiliated with Mojang, Microsoft, PaperMC,
+            or Modrinth.
+          </p>
+        </footer>
+      </div>
     </>
   );
 }
