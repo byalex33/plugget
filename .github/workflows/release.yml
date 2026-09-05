@@ -1,0 +1,97 @@
+name: Release
+on:
+  push:
+    tags: ['v[0-9]*']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --check
+      - run: cargo clippy --locked --all-targets --all-features -- -D warnings
+      - run: cargo test --locked --all
+      - name: Check tag matches package version
+        shell: python
+        run: |
+          import os, tomllib
+          with open('Cargo.toml', 'rb') as f:
+              version = tomllib.load(f)['package']['version']
+          assert os.environ['GITHUB_REF_NAME'] == 'v' + version
+  build:
+    needs: verify
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - os: windows-11-arm
+            target: aarch64-pc-windows-msvc
+          - os: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+          - os: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+          - os: macos-15-intel
+            target: x86_64-apple-darwin
+          - os: macos-15
+            target: aarch64-apple-darwin
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --locked --all
+      - run: cargo build --locked --release --target ${{ matrix.target }}
+      - name: Package binary and SHA256
+        shell: python
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          import hashlib, os, pathlib, tarfile, zipfile
+          target = os.environ['TARGET']
+          stem = 'plugget-' + os.environ['GITHUB_REF_NAME'] + '-' + target
+          out = pathlib.Path('dist')
+          out.mkdir()
+          binary = 'plugget.exe' if 'windows' in target else 'plugget'
+          files = [(pathlib.Path('target') / target / 'release' / binary, binary), (pathlib.Path('README.md'), 'README.md'), (pathlib.Path('LICENSE'), 'LICENSE')]
+          if 'windows' in target:
+              archive = out / (stem + '.zip')
+              with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as z:
+                  for src, name in files:
+                      z.write(src, name)
+          else:
+              archive = out / (stem + '.tar.gz')
+              with tarfile.open(archive, 'w:gz') as t:
+                  for src, name in files:
+                      t.add(src, arcname=name)
+          digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+          (out / (archive.name + '.sha256')).write_text(digest + '  ' + archive.name + '\n')
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plugget-${{ matrix.target }}
+          path: dist/*
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: plugget-*
+          merge-multiple: true
+          path: dist
+      - name: Create draft GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: gh release create "$RELEASE_TAG" dist/* --draft --verify-tag --generate-notes
