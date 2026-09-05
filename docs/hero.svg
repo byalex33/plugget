@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="480" viewBox="0 0 1280 480" role="img" aria-labelledby="title description">
+  <title id="title">Plugget — the package manager for Minecraft server plugins</title>
+  <desc id="description">Plugget branding beside a terminal showing search, install, and update commands. Built with Rust for Paper, Purpur, Spigot, and Bukkit.</desc>
+  <defs>
+    <linearGradient id="background" x2="1" y2="1"><stop stop-color="#0b1719"/><stop offset="1" stop-color="#102b26"/></linearGradient>
+    <linearGradient id="accent" x2="1" y2="1"><stop stop-color="#a3f7bd"/><stop offset="1" stop-color="#38d9a9"/></linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#a3f7bd" stroke-opacity=".04"/></pattern>
+  </defs>
+  <rect width="1280" height="480" rx="20" fill="url(#background)"/>
+  <rect width="1280" height="480" rx="20" fill="url(#grid)"/>
+  <path d="M0 479H1280" stroke="#54dda7" stroke-opacity=".3"/>
+  <g transform="translate(64 59)">
+    <rect width="58" height="58" rx="14" fill="url(#accent)"/>
+    <path d="M21 14v13m16-13v13M17 26h24v7a12 12 0 0 1-12 12v7" fill="none" stroke="#0d2821" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="77" y="35" font-family="Segoe UI,Arial,sans-serif" font-size="13" font-weight="700" letter-spacing="3" fill="#b8d2c8">LESS CLICKING. MORE CRAFTING.</text>
+  </g>
+  <text x="62" y="221" font-family="Segoe UI,Arial,sans-serif" font-size="84" font-weight="750" letter-spacing="-4" fill="#f2faf5">Plugget<tspan fill="#6ce8ad">.</tspan></text>
+  <g font-family="Segoe UI,Arial,sans-serif" font-size="25" fill="#b7cfc5">
+    <text x="66" y="275">The package manager for</text>
+    <text x="66" y="309">Minecraft server plugins.</text>
+  </g>
+  <text x="66" y="400" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="600" letter-spacing="1.8" fill="#7cb59f">OPEN SOURCE  /  NATIVE CLI  /  BUILT WITH RUST</text>
+  <g transform="translate(656 74)">
+    <rect width="560" height="332" rx="12" fill="#071310" stroke="#315348"/>
+    <path d="M1 45H559" stroke="#223d33"/>
+    <g fill="#4d7062"><circle cx="24" cy="23" r="5"/><circle cx="42" cy="23" r="5"/><circle cx="60" cy="23" r="5"/></g>
+    <text x="278" y="28" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="12" fill="#81a393">your-server / plugins</text>
+    <g font-family="Consolas,Menlo,monospace" font-size="18">
+      <text x="28" y="95" fill="#729486"># Find your next plugin</text>
+      <text x="28" y="125" fill="#e0f0e7"><tspan fill="#79e8af">$ </tspan>plugget search luckperms</text>
+      <text x="28" y="177" fill="#729486"># Install with confidence</text>
+      <text x="28" y="207" fill="#e0f0e7"><tspan fill="#79e8af">$ </tspan>plugget install luckperms</text>
+      <text x="28" y="259" fill="#729486"># Keep your server up to date</text>
+      <text x="28" y="289" fill="#e0f0e7"><tspan fill="#79e8af">$ </tspan>plugget update --all</text>
+    </g>
+  </g>
+</svg>

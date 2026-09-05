@@ -1,236 +1,247 @@
-# Plugget
+<p align="center">
+  <img src="docs/hero.svg" alt="Plugget — the package manager for Minecraft server plugins" width="100%">
+</p>
 
-**The package manager for Minecraft server plugins.**
+<p align="center">
+  <a href="https://github.com/byalex33/plugget/actions/workflows/ci.yml"><img src="https://github.com/byalex33/plugget/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-79e8af?labelColor=132920" alt="MIT license"></a>
+  <a href="Cargo.toml"><img src="https://img.shields.io/badge/built_with-Rust-e8b48b?labelColor=132920" alt="Built with Rust"></a>
+  <a href="#compatibility"><img src="https://img.shields.io/badge/source-Modrinth-79e8af?labelColor=132920" alt="Modrinth package source"></a>
+</p>
 
-```console
-$ plugget install luckperms
+<p align="center">
+  <strong>Find it. Install it. Keep it updated.</strong><br>
+  A focused, open-source CLI for managing your Minecraft server's plugins.
+</p>
+
+<p align="center">
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#installation">Installation</a> ·
+  <a href="docs/guide.md">User guide</a> ·
+  <a href="https://github.com/byalex33/plugget/issues">Report an issue</a> ·
+  <a href="#contributing">Contribute</a>
+</p>
+
+---
+
+## Your plugins, one command away
+
+Plugget brings the familiar package-manager workflow to Minecraft servers.
+Search Modrinth, install the right release for your server, and update your
+managed plugins from the terminal — with checksums, dependency tracking, and
+recoverable changes built in.
+
+```sh
+plugget search luckperms
+plugget install luckperms
+plugget update --all
 ```
 
-[plugget.dev](https://plugget.dev) · Rust · Native CLI · Modrinth
+| Built for server admins | What that means |
+| :--- | :--- |
+| **Compatibility comes first** | Selects releases for your Minecraft version and server platform. Stable releases are the default. |
+| **Verified before installation** | Checks download size, SHA512, and JAR structure before publishing a plugin. |
+| **Your files stay yours** | Tracks project IDs and exact owned files. Unmanaged plugins remain untouched. |
+| **Updates with a recovery path** | Stages replacements, retains the old JAR until commit, and journals interrupted changes. |
+| **Dependencies included** | Plans required Modrinth dependencies and asks before installing them. |
+| **Ready for scripts** | Clean JSON, predictable exit codes, and noninteractive confirmations. |
 
-Plugget installs, tracks, checks and updates plugin JARs in a local Minecraft
-server directory. It verifies SHA512 hashes, records package identities and
-dependencies, and protects files it does not own. It does not start servers or
-hot-load plugins.
+> [!NOTE]
+> **Early release · v0.1.0.** The Windows build and live Modrinth workflows have
+> been verified. Native CI and release packaging cover Windows, Linux, and macOS;
+> cross-platform validation is still in progress. See the [verification report](VERIFICATION.md).
+
+## Quick start
+
+From your server's root directory:
+
+```sh
+# Set up Plugget for this server.
+plugget init
+
+# Find a plugin and inspect its compatible release.
+plugget search luckperms
+plugget info luckperms
+
+# Install it, then check what you manage.
+plugget install luckperms
+plugget list
+
+# Review available updates before applying them.
+plugget outdated
+plugget update --all
+```
+
+If detection needs a little help, specify your server explicitly:
+
+```sh
+plugget init --platform paper --minecraft 1.21.11
+```
+
+When detection is unambiguous, you can go straight to `plugget install`.
+Plugget creates its local configuration automatically.
+
+> [!IMPORTANT]
+> Stop your Minecraft server before changing plugins, then restart it afterward.
+> Plugget manages files on disk; it does not hot-load or unload plugins.
 
 ## Installation
 
-Build from this checkout with stable Rust (1.88 or newer):
+**Build from source today** with [Rust](https://www.rust-lang.org/tools/install)
+1.88 or newer:
 
 ```sh
+git clone https://github.com/byalex33/plugget.git
+cd plugget
 cargo install --path . --locked
 plugget --help
 ```
 
-Or build with `cargo build --release` and place `target/release/plugget`
-(`plugget.exe` on Windows) on your PATH. The executable is self-contained; Rust
-is not required to run it.
+Cargo installs the executable into its `bin` directory. Make sure that directory
+is on your `PATH`.
 
-The release workflow prepares ZIP/tar.gz archives and SHA256 checksum files for
-Windows x86_64/ARM64, Linux x86_64/ARM64 and macOS Intel/Apple Silicon. After a release
-is published, download the archive for your system, verify its SHA256, extract
-it and add the binary directory to PATH. Linux binaries built on Ubuntu 24.04
-require glibc 2.39 or newer. All release targets require native CI validation
-before publication.
+Prefer a standalone executable? Run `cargo build --release` and copy
+`target/release/plugget` — `plugget.exe` on Windows — to a directory on your
+`PATH`. Rust is only needed to build it.
 
-No package registry publication has been performed. winget, Homebrew, Scoop,
-Chocolatey, AUR and crates.io distribution are future packaging work.
+<details>
+<summary><strong>Prebuilt binaries and package managers</strong></summary>
 
-## Quick start
+The [release workflow](.github/workflows/release.yml) prepares archives and
+SHA256 checksums for these targets:
 
-Stop your server, then run these commands **inside its root directory**:
+| System | Architectures | Archive |
+| :--- | :--- | :--- |
+| Windows | x86_64, ARM64 | `.zip` |
+| Linux | x86_64, ARM64 | `.tar.gz` |
+| macOS | Intel, Apple Silicon | `.tar.gz` |
 
-```sh
-plugget init
-# If detection needs an explicit override:
-plugget init --minecraft 1.21.11 --platform paper
+Prebuilt releases have not been published yet. When available, they will appear
+on the [Releases page](https://github.com/byalex33/plugget/releases). Verify the
+archive's SHA256 before installing. The current Linux packaging targets glibc
+2.39 or newer.
 
-plugget search luckperms
-plugget info luckperms
-plugget install luckperms
-plugget list
-plugget outdated
-plugget update --all
-plugget remove luckperms
-```
+Distribution through winget, Homebrew, Scoop, Chocolatey, AUR, and crates.io is
+planned. No registry package is currently published.
 
-Restart the server after plugin changes. Plugget always warns before mutations
-because it cannot reliably determine whether every possible server launch method
-is running. It never attempts plugin loading/unloading.
+</details>
 
-You can skip `init` when the server platform and Minecraft version are detected
-unambiguously: `install` creates missing Plugget configuration automatically.
+## The command toolkit
 
-## Commands
+| Command | What it does |
+| :--- | :--- |
+| `plugget init` | Detect your server and create Plugget metadata. |
+| `plugget search <query>` | Find server plugins on Modrinth. |
+| `plugget info <plugin>` | Show authors, compatibility, versions, and dependencies. |
+| `plugget install <plugin>` | Install a plugin and its required dependencies. |
+| `plugget list` | List managed plugins and show unmanaged JARs separately. |
+| `plugget outdated` | Check for newer compatible releases. |
+| `plugget update <plugin>` | Update one managed plugin. |
+| `plugget update --all` | Update all managed plugins and report individual failures. |
+| `plugget remove <plugin>` | Move a managed JAR to the Recycle Bin or Trash. |
+| `plugget doctor` | Diagnose configuration, integrity, duplicate JARs, and connectivity. |
+| `plugget version` | Show the installed Plugget version. |
 
-| Command | Purpose |
-| --- | --- |
-| `init [--minecraft VERSION] [--platform PLATFORM]` | Detect server, record configuration, count existing JARs |
-| `search QUERY [--limit 1..100]` | Ranked Modrinth search filtered to plugin loaders |
-| `info PLUGIN` | Project, authors, compatible version, platforms, dependencies and installed state |
-| `install PLUGIN [--version ID_OR_NUMBER] [--prerelease]` | Install an exact slug/ID or explicitly select a search result |
-| `list` | Offline managed inventory and separate unmanaged JAR list |
-| `outdated` | Check for newer compatible releases |
-| `update [PLUGIN] [--prerelease]` | Update one plugin; no name means all |
-| `update --all` | Update all managed plugins, reporting partial failures |
-| `remove PLUGIN` | Recycle the exact, checksum-verified managed JAR |
-| `doctor [--offline]` | Read-only integrity, duplicate, staging, config and network checks |
-| `version` | Show Plugget version |
+`plugget update` without a name also updates all managed plugins.
+Use `plugget <command> --help` for every available option.
 
-Every command supports `--help`. Global options: `--quiet`, `--verbose`,
-`--json`, `--yes`/`-y`, `--no-color`. Output uses ASCII without terminal color,
-so it works in redirected logs and older terminals. Verbose mode prints bounded
-HTTP diagnostics to stderr. JSON mode disables diagnostics and prompts.
+<details>
+<summary><strong>Useful recipes</strong></summary>
 
 ```sh
-plugget search "world edit" --limit 20 --json
-plugget install chunky --yes
-plugget install luckperms --version VERSION_ID --yes
+# Search a phrase and return more results.
+plugget search "world edit" --limit 20
+
+# Install an exact version ID or version number.
+plugget install luckperms --version VERSION_ID
+
+# Explicitly allow compatible alpha and beta releases.
+plugget install chunky --prerelease
+
+# Approve installation and required dependencies without a prompt.
+plugget install luckperms --yes
+
+# Produce one machine-readable result.
 plugget update --all --yes --json
+
+# Check local integrity without making a network request.
+plugget doctor --offline
 ```
 
-Exact project slugs and IDs resolve directly. A fuzzy result always needs
-explicit selection, even when there is only one match. `--yes` does not choose
-an ambiguous project. In noninteractive/JSON mode, the error lists possible
-slugs; rerun with an exact slug or ID. Noninteractive mutations require `--yes`.
+Global options: `--quiet`, `--verbose`, `--json`, `--yes` / `-y`, and `--no-color`.
+`--json` disables prompts. Noninteractive mutations require `--yes`.
 
-`list` is deliberately offline and labels packages as installed, not as
-up-to-date without checking. Use `outdated` for current upstream information.
-`info` requires a detected or configured platform and Minecraft version.
+Exact slugs and project IDs resolve directly. Fuzzy matches require explicit
+selection; `--yes` never silently chooses a similarly named project.
 
-## Compatibility and dependencies
+</details>
 
-| Server | Accepted upstream plugin loaders |
-| --- | --- |
-| Purpur | purpur, paper, spigot, bukkit |
-| Paper | paper, spigot, bukkit |
-| Spigot | spigot, bukkit |
-| Bukkit/CraftBukkit | bukkit |
+## Compatibility
 
-Minecraft versions match upstream metadata exactly; `1.21.1` does not imply
-`1.21.11`. Plugget sorts releases by publication time, not arbitrary plugin
-version strings. Stable releases are used by default. `--prerelease` (or config)
-explicitly permits beta/alpha releases. Requested versions must still be
-compatible. Updating never automatically downgrades to an older publication.
+Plugget understands the relationship between server platforms:
 
-Detection examines known server JAR names, bounded `version.json`/manifest
-entries and generated platform configuration filenames. Conflicting or absent
-evidence requires an override; Plugget does not infer versions from old logs.
-Folia, Fabric, Forge, Vanilla and other unsupported servers are not inferred as
-Paper-compatible.
+| Your server | Accepted plugin loaders |
+| :--- | :--- |
+| **Paper** | `paper`, `spigot`, `bukkit` |
+| **Purpur** | `purpur`, `paper`, `spigot`, `bukkit` |
+| **Spigot** | `spigot`, `bukkit` |
+| **Bukkit / CraftBukkit** | `bukkit` |
 
-Required Modrinth dependencies are planned recursively, shown in the confirmation,
-and installed with the requested plugin. `--yes` approves that plan. Optional
-and embedded dependencies are not installed. Cycles, conflicting pinned
-versions, declared conflicts and missing external dependency identities fail
-before modifying live files. Packages required by other managed plugins cannot
-be removed. Removing a parent does not automatically remove its dependencies.
+A Bukkit plugin can be selected for Paper. A Paper-only plugin is not assumed
+to work on Spigot. Minecraft versions match upstream metadata exactly, and
+incompatible releases are excluded from update checks.
 
-## Configuration and state
+**Modrinth is the supported source for v0.1.** Spigot, Hangar, and GitHub Releases
+providers are planned. Folia, Fabric, Forge, and Vanilla servers are outside the
+current supported scope.
+
+Compatibility metadata comes from upstream authors and cannot guarantee that a
+plugin will work correctly on your server.
+
+## Designed to respect your server
+
+Plugget keeps configuration and package identities in `.plugget/`, alongside
+your existing `plugins/` directory:
 
 ```text
-.plugget/
-  config.toml
-  lock.json
-  process.lock
-  transaction.json        # only while a transaction/recovery is pending
-  transaction-*/          # staged downloads and recoverable backups
-plugins/
+your-server/
+├── server.properties
+├── plugins/
+│   ├── LuckPerms-Bukkit-….jar
+│   └── YourPrivatePlugin.jar
+└── .plugget/
+    ├── config.toml
+    ├── lock.json
+    └── process.lock
 ```
 
-```toml
-platform = "paper"
-minecraft = "1.21.11"
-allow_prerelease = false
-```
+**Existing JARs remain unmanaged.** Initialization counts them without adopting
+or replacing them. Removal only acts on an exact, checksum-verified file that
+Plugget owns, and retains the plugin's configuration and data directories.
 
-Global defaults live in `config.toml` under `%APPDATA%\plugget` on Windows,
-`~/Library/Application Support/plugget` on macOS, or
-`${XDG_CONFIG_HOME:-~/.config}/plugget` on Linux. Per-server settings override
-global defaults. Explicit `init` options are saved locally. Existing local
-configuration is only replaced after confirmation (or `--yes`).
+**Changes are recoverable.** Downloads are staged before installation, a process
+lock prevents overlapping Plugget mutations, and a journal supports rollback or
+recovery after interruption. Obsolete files go to the OS Recycle Bin or Trash.
 
-The schema-1 lock records provider, project ID, slug, version ID/number, owned
-filename, SHA512, installation/publication timestamps and dependency identities
-with exact pins where required. Project IDs are authoritative, not filenames.
-Do not hand-edit the lock to adopt unrelated plugins.
+A local filesystem with hard-link and atomic-rename support is required.
+If Trash is unavailable, Plugget reports the failure and retains recovery data;
+there is no permanent-delete fallback. Keep normal server backups.
 
-API metadata is cached in memory for 30 seconds within one command. Binary
-downloads are streamed with a 512 MiB cap and are not kept as an indefinite
-download cache. Failed staging files are retained for diagnosis.
+Read the [configuration, recovery, and scripting guide](docs/guide.md) for global
+config locations, dependency rules, JSON responses, and exit codes.
 
-## File safety and recovery
+## Contributing
 
-* Downloads stay in staging until size, SHA512 and JAR structure are verified.
-* Files are published using a same-filesystem atomic no-clobber hard link.
-* Unmanaged target collisions, unsafe filenames, symlinks/reparse points and
-  modified managed files stop the operation.
-* An exclusive OS process lock serializes changes in a server directory.
-* A durable journal precedes live changes; atomic lock replacement commits them.
-* Required dependencies and a requested install are one transaction. `update
-  --all` uses one transaction per requested package and reports partial failures.
-* Existing JARs are retained in staging until commit. Failure rolls back; a
-  later mutating command recovers an interrupted transaction automatically.
-* Obsolete JARs and transaction files go to the OS Recycle Bin/Trash. There is
-  **no permanent-delete fallback**. Plugin config/data directories are retained.
+Plugget is **MIT-licensed** and open to contributions. Bug reports, documentation
+improvements, compatibility fixtures, and focused fixes are welcome.
 
-If recycling is unavailable (some headless, container or network-filesystem
-setups), cleanup fails explicitly and backups/journal remain. A committed change
-may already be active; the error says so. Fix Trash availability and rerun a
-mutating command. If the lock or journal is invalid, restore a known-good backup
-or inspect it manually; Plugget refuses to guess ownership. `doctor` never fixes
-or deletes anything. Unjournaled failed downloads may be moved to Trash manually
-after confirming no Plugget process is active.
-
-Use a local filesystem supporting atomic rename and hard links. Transactions
-protect against process interruption; they do not provide full ACID guarantees
-against hardware failure, hostile local users, or concurrent manual edits by
-the server/admin. Stop the Minecraft server before changes. Keep normal server
-backups.
-
-## JSON and exit codes
-
-JSON mode emits exactly one object on stdout, including on command errors:
-
-```json
-{"schema":1,"ok":true,"data":{"name":"Plugget","version":"0.1.0"}}
-```
-
-```json
-{"schema":1,"ok":false,"error":{"message":"...","exit_code":1}}
-```
-
-Update partial failures use `data.updates` and `data.errors`. Doctor findings
-use `data.issues`. Warnings about restarting are represented by
-`restart_required` in mutation results. Success envelopes are versioned for
-future output evolution.
-
-| Exit | Meaning |
-| --- | --- |
-| 0 | Success (including no available updates) |
-| 1 | Operation, network, safety, configuration or confirmation failure |
-| 2 | Invalid CLI arguments |
-| 3 | One or more update/check failures; inspect individual results |
-| 4 | Doctor found issues |
-
-## Providers
-
-| Provider | Status |
-| --- | --- |
-| Modrinth | Supported, official v2 API |
-| Spigot | Planned |
-| Hangar | Planned |
-| GitHub Releases | Planned |
-
-Integration follows the official [API overview](https://docs.modrinth.com/api/),
-[search](https://docs.modrinth.com/api/operations/searchprojects/),
-[project versions](https://docs.modrinth.com/api/operations/getprojectversions/)
-and [version](https://docs.modrinth.com/api/operations/getversion/) documentation.
-Requests identify `Plugget/VERSION (https://plugget.dev)`. HTTPS is enforced,
-redirects are rejected and binary hosts are restricted to Modrinth's CDN.
-Timeouts, bounded retries and rate-limit delays are centralized.
-
-## Development and releases
+1. [Open an issue](https://github.com/byalex33/plugget/issues) with the problem or
+   proposed change. For bugs, include your OS, Plugget version, server platform,
+   Minecraft version, and the command that failed. Remove private details from logs.
+2. Fork the repository and make your change on a branch. Discuss larger features
+   before investing in an implementation.
+3. Run the checks below, then [open a pull request](https://github.com/byalex33/plugget/pulls)
+   describing the change and how you verified it.
 
 ```sh
 cargo fmt --check
@@ -239,24 +250,27 @@ cargo test --all
 cargo build --release
 ```
 
-`src/cli.rs` and `commands.rs` handle parsing and presentation. `minecraft.rs`
-owns detection and loader relationships. `providers/` translates Modrinth data
-to common package types; `network.rs` owns HTTP policy. `packages.rs` resolves
-versions/dependencies; `state.rs` owns configuration, ownership and recovery.
-Tests cover resolver and filesystem behavior, mocked HTTP and executable CLI
-flows. Test fixture directories are retained in the OS temp directory rather
-than permanently deleted; they can be moved to Trash after inspection.
+The code separates CLI workflows, server detection, providers, dependency
+resolution, networking, and filesystem state. Start with the
+[architecture and verification report](VERIFICATION.md) to find the right module.
 
-CI checks Windows, macOS and Linux. A `vX.Y.Z` tag must match Cargo.toml; the
-release workflow verifies, builds native archives and checksums, and creates a
-**draft** GitHub Release for review. No release has been published by creating
-this repository. Signing/notarization and registry manifests remain release
-operations requiring maintainer setup.
+For a suspected vulnerability, use GitHub's
+[private vulnerability reporting](https://github.com/byalex33/plugget/security/advisories/new)
+instead of posting exploit details in a public issue.
 
-For v0.2, prioritize hash-based adoption of existing plugins with explicit
-identity confirmation. `import`, declarative `plugget.toml`/`sync`, remote
-management and additional providers are intentionally outside v0.1.
+## What's next
 
-Plugget is not affiliated with Mojang, Microsoft, PaperMC, or Modrinth.
-Plugin compatibility metadata comes from upstream authors and cannot be
-guaranteed.
+- **Release validation:** exercise every native target and prepare reviewed binaries.
+- **Existing-server adoption:** identify existing JARs by hash, with explicit confirmation.
+- **More sources:** add providers while keeping the installation workflow consistent.
+- **Easier installation:** package-manager distribution after release validation.
+
+The focus stays on a reliable local CLI. Import, declarative manifests, and sync
+are future work. There are no accounts, telemetry, or Minecraft-side components.
+
+---
+
+<p align="center">
+  <strong>Plugget</strong> · <a href="LICENSE">MIT licensed</a> · <a href="https://plugget.dev">plugget.dev</a><br>
+  <sub>Not affiliated with Mojang, Microsoft, PaperMC, or Modrinth.</sub>
+</p>
